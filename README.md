@@ -1,6 +1,6 @@
 # Oscarpedia
 
-doesnt work for other pc's rn due to directory coinflicts, try to extratc app.py and movies.sqlite if you can
+For now to run the .bat file, edit the pyvenv.cfg file to point to your installed python directory.
 
 will work on creating an executable
 
