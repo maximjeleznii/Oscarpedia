@@ -64,6 +64,17 @@ def get_movie(id):
     return movie_schema.jsonify(movie)
 
 
+# Get by Year
+@app.route('/Oscarpedia/search', methods=['GET'])
+def get_movies_by_search():
+    result = []
+    args = request.args
+    for k, v in args.items():
+        search_movies = Movie.query.filter(Movie.__getattribute__(Movie, k) == v).all()
+        result = result + movies_schema.dump(search_movies)
+    return jsonify(result)
+
+
 # Modify movie entry
 @app.route('/Oscarpedia/<id>', methods=['PUT'])
 def update_movie(id):
