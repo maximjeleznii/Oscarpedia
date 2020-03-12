@@ -1,3 +1,1 @@
-cd venv/Scripts
-python ../../src/app.py
-pause
+pipenv run Oscarpedia_Shell_CMD
