@@ -1,3 +1,0 @@
-# Oscarpedia
-
-OSCAPEDIA BATCH FILE SHOULD WORK
