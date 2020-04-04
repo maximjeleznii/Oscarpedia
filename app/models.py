@@ -14,12 +14,14 @@ class Movie(db.Model):
     name = db.Column(db.String(100))
     year = db.Column(db.Integer)
     description = db.Column(db.String(200))
-    oscars = db.relationship('Oscar', secondary=movieOscars, lazy='subquery', backref=db.backref('movies', lazy=True))
+    oscars = db.relationship('Oscar', secondary=movieOscars, backref=db.backref('movies'))
+    poster = db.Column(db.String(100))
 
-    def __init__(self, name, year, description):
+    def __init__(self, name, year, description, posters):
         self.name = name
         self.year = year
         self.description = description
+        self.poster = poster
 
 
 #Oscar Category Model
@@ -42,7 +44,7 @@ oscars_schema = OscarSchema(many=True)
 class MovieSchema(ma.Schema):
     oscars = ma.Nested(OscarSchema, many=True)
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'oscars')
+        fields = ('id', 'name', 'year', 'description', 'oscars', 'poster')
 
 movie_schema = MovieSchema()
 movies_schema = MovieSchema(many=True)

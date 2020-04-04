@@ -2,17 +2,20 @@
 
 {% block content %}
     <h1>Hi</h1>
-    {% for result in results %}
+    {% for result in results if result.id<6 %}
     <div>
+        <img src= {{ url_for('static', filename = 'images/posters/'+ result.poster+'.jpg') }} alt={{ result.name }} width="90" height="120"></img>
+        </br>
         <p>
             {{ result.name }}
-            </b>
+        </p>
+        <p>
             {% for oscar in result.oscars %}
                 {{ oscar.category }}
             {% endfor %}
             </b>
         </p>
-    
     </div>
+    <br/>
     {% endfor %}
 {% endblock %}

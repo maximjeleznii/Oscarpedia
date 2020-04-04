@@ -31,7 +31,6 @@ def get_movies_json():
 def get_movies():
     all_movies = Movie.query.all()
     results = movies_schema.dump(all_movies)
-    print(results)
     return render_template('index.html', results=results)
 
 
@@ -47,13 +46,28 @@ def get_movie(id):
 def get_movies_by_search():
     result = []
     args = request.args
+
+    #comes up with search results for every request in args
     for k, v in args.items():
+
+        #relationship searches need their own if instances, such as oscars
         try:
-            search_movies = Movie.query.filter(Movie.__getattribute__(Movie, k).contains(v)).all()
-            result = result + movies_schema.dump(search_movies)
+            if k.lower() in "oscars":
+                search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(v))).all()
+            else:
+                search_movies = Movie.query.filter(Movie.__getattribute__(Movie, k).contains(v)).all()
         except:
             pass
-    return jsonify(result)
+
+        #checks if results of search are already in the result
+        for movie in search_movies:
+
+            #only adds searches not already in result
+            if movie not in result:
+                templist = [movie]
+                result = result + templist
+
+    return jsonify(movie_schema.dump(result, many=True))
 
 
 # Modify movie entry
