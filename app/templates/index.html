@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="text-center">Welcome to the Oscarpedia</h1>
     <div class="container">
-        {% for result in result if result.id<26 %}
+        {% for result in result %}
         <div class="row my-4 ml-2 mr-2 border border-dark">
             <div class="col-sm-2 ml-4 mr-4 my-2">
                 <div class="row">

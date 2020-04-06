@@ -23,13 +23,14 @@
         <nav class="navbar navbar-dark bg-dark">
             <a class="navbar-brand inl" href={{ url_for('get_movies') }}>Oscarpedia</a>
             <div class="justify-content-end">
-                <form novalidate class="form-inline my-0 justify-content-end">
+                <form novalidate method="POST" class="form-inline my-0 justify-content-end">
                     <div class="form-group row my-1">
+                        {{ searchform.hidden_tag() }}
                         <div class="col pr-1 my-1">
-                            {{ form.search(type="search", class="form-control-sm", placeholder="Search Here") }}
+                            {{ searchform.search }}
                         </div>
                         <div class="col pl-1 my-1">
-                            <button class="btn-sm btn-success my-0" type="submit">Search</button>
+                            {{ searchform.submit }}
                         </div>
                     </div>
                 </form>
@@ -45,6 +46,17 @@
         </ul>
         {% endif %}
         {% endwith %}
+        <h1 class="text-center">{{ title }}</h1>
+        <div class="row justify-content-center">
+            <div class="col-2 border">
+                {% if not page == 1 %}
+                    <a href="{{ prev_url }}">{{ page-1 }}</a>
+                {% endif %}
+            </div>
+            <div class="col-2 border">
+                <a href="{{ next_url }}">{{ page+1 }}</a>
+            </div>
+        </div>
         {% block content %}{% endblock %}
     </body>
 </html>

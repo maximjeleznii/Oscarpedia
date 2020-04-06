@@ -1,4 +1,5 @@
-from flask import render_template, flash, redirect, jsonify, make_response, request
+from flask import render_template, flash, redirect
+from flask import jsonify, make_response, request, url_for
 from app import app, db, ma
 from app.models import *
 from app.forms import SearchForm
@@ -21,17 +22,39 @@ def add_movie():
 @app.route('/Oscarpedia', methods=['GET', 'POST'])
 def get_movies():
     result=[]
-    form = SearchForm()
+    searchform = SearchForm()
     args = request.args
+    page = args.get('page', 1, type=int)
+
+    if searchform.validate_on_submit():
+        return redirect(url_for('get_movies', search=searchform.search.data))
+
     #if no searches return all
-    if not bool(args):
+    if not bool(args.get('search')):
+        title = "Welcome to the Oscarpedia"
         result = query_all()
-        return render_template('index.html', result=result, form=form)
 
     #return searches      
     else:
+        title = "Search Results"
         result = query_search(args.get('search'))
-        return render_template('search.html', result=result, form=form)
+
+    #handling next and prev urls
+    if not page==1:
+        prev_url=url_for('get_movies', search=args.get('search'), page=page-1)
+    else:
+        prev_url=url_for('get_movies', search=args.get('search'), page=page)
+    if bool(result[(page+1)*app.config['MOVIES_PER_PAGE']-5:(page+1)*app.config['MOVIES_PER_PAGE']]):
+        next_url=url_for('get_movies', search=args.get('search'), page=page+1)
+    else:
+        next_url=url_for('get_movies', search=args.get('search'), page=page)
+
+    #picking out results relavent ot the page
+    result = result[page*app.config['MOVIES_PER_PAGE']-5:page*app.config['MOVIES_PER_PAGE']]
+
+    return render_template('index.html', title=title, result=result, searchform=searchform, 
+                        page=page, prev_url=prev_url, next_url=next_url)
+
 
 #get all json or by search
 @app.route('/Oscarpedia/json', methods=['GET'])
@@ -43,7 +66,7 @@ def search_json():
     #if no searches return all
     if not bool(args):
         result = query_all()
-        return jsonify(result)
+        return jsonify(movie_schema.dump(result))
 
     #else search through database
     else:
@@ -69,8 +92,7 @@ def search_json():
 #helper method to query all movies
 def query_all():
     result = []
-    all_movies = Movie.query.all()
-    result = movies_schema.dump(all_movies)
+    result = Movie.query.all()
     return result
 
 #helper method to query by search
