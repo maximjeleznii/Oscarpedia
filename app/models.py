@@ -23,7 +23,6 @@ class Movie(db.Model):
         self.description = description
         self.poster = poster
 
-
 #Oscar Category Model
 class Oscar(db.Model):
     id = db.Column(db.Integer, primary_key=True)

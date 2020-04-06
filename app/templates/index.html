@@ -1,21 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Hi</h1>
-    {% for result in results if result.id<6 %}
-    <div>
-        <img src= {{ url_for('static', filename = 'images/posters/'+ result.poster+'.jpg') }} alt={{ result.name }} width="90" height="120"></img>
-        </br>
-        <p>
-            {{ result.name }}
-        </p>
-        <p>
-            {% for oscar in result.oscars %}
-                {{ oscar.category }}
-            {% endfor %}
-            </b>
-        </p>
+    <h6 class="text-center">Search Results</h6>
+    <div class="container">
+        {% for result in results if result.id<26 %}
+        <div class="row my-4 ml-2 mr-2 border border-dark">
+            <div class="col-sm-2 ml-4 mr-4 my-2">
+                <div class="row">
+                    <img class="mx-auto" src= {{ url_for('static', filename = 'images/posters/'+ result.name.lower()+'.jpg') }}
+                        alt={{ result.name }} width="90" height="120"></img>
+                </div>
+                <div class="row">
+                    <h8 class="mx-auto text-center">{{ result.name }} ({{ result.year }})</h8>
+                </div>
+            </div>
+            <div class="col ml-4 mr-4 my-2">
+                <div class="row">
+                    <p>{{ result.description }}</p>
+                </div>
+                <div class="row">
+                    <a class="mr-2" data-toggle="collapse" 
+                        href={{ "#a"+result.id|string }} aria-expanded="false" 
+                        aria-controls={{ "a"+result.id|string }}>
+                        Oscars:
+                    </a>
+                    <p class="collapse" id={{ "a"+result.id|string }}>
+                        {% for oscars in result.oscars %}
+                            {{ oscars.category+"," }}
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    <br/>
-    {% endfor %}
+
 {% endblock %}

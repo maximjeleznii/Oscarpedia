@@ -1,17 +1,40 @@
 <html>
     <head>
-      {% if title %}
-      <title>{{ title }} - Oscarpedia</title>
-      {% else %}
-      <title>Welcome to Oscarpedia</title>
-      {% endif %}
+        <link rel="stylesheet" 
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+         crossorigin="anonymous">
+        {% if title %}
+        <title>{{ title }} - Oscarpedia</title>
+        {% else %}
+        <title>Welcome to Oscarpedia</title>
+        {% endif %}
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" 
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" 
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" 
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" 
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" 
+            crossorigin="anonymous"></script>
     </head>
     <body>
-        <div>
-            Oscarpedia:
-             <a href="">Home</a>
-             <a href="">Login</a>
-        </div>
+        <nav class="navbar navbar-dark bg-dark">
+            <a class="navbar-brand inl" href={{ url_for('get_movies') }}>Oscarpedia</a>
+            <div class="justify-content-end">
+                <form novalidate class="form-inline my-0 justify-content-end">
+                    <div class="form-group row my-1">
+                        <div class="col pr-1 my-1">
+                            {{ form.search(type="search", class="form-control-sm", placeholder="Search Here") }}
+                        </div>
+                        <div class="col pl-1 my-1">
+                            <button class="btn-sm btn-success my-0" type="submit">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </nav>
         <hr>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
