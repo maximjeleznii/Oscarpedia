@@ -20,39 +20,30 @@ def add_movie():
 #get home page html
 @app.route('/Oscarpedia', methods=['GET', 'POST'])
 def get_movies():
-    results=[]
+    result=[]
     form = SearchForm()
     args = request.args
     #if no searches return all
     if not bool(args):
-        all_movies = Movie.query.all()
-        results = movies_schema.dump(all_movies)
-        return render_template('index.html', results=results, form=form)
+        result = query_all()
+        return render_template('index.html', result=result, form=form)
 
     #return searches      
     else:
-        search_movies=search_movies = Movie.query.filter(Movie.name.contains(request.args.get('search'))).all()
-        results = movies_schema.dump(search_movies)
-        return render_template('search.html', results=results, form=form)
-
-#get json by ID
-@app.route('/Oscarpedia/json/<id>', methods=['GET'])
-def get_movie(id):
-    movie = Movie.query.get(id)
-    return movie_schema.jsonify(movie)
-
+        result = query_search(args.get('search'))
+        return render_template('search.html', result=result, form=form)
 
 #get all json or by search
 @app.route('/Oscarpedia/json', methods=['GET'])
 def search_json():
     result = []
     args = request.args
+    search_movies = []
 
     #if no searches return all
     if not bool(args):
-        all_movies = Movie.query.all()
-        results = movies_schema.dump(all_movies)
-        return jsonify(results)
+        result = query_all()
+        return jsonify(result)
 
     #else search through database
     else:
@@ -64,21 +55,59 @@ def search_json():
             try:
                 if k.lower() in "oscars":
                     search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(v))).all()
+                elif k.lower() in "search":
+                    search_movies = query_search(v)
                 else:
                     search_movies = Movie.query.filter(Movie.__getattribute__(Movie, k).contains(v)).all()
             except:
                 pass
 
-        #checks if results of search are already in the result
-        for movie in search_movies:
-
-            #only adds searches not already in result
-            if movie not in result:
-                templist = [movie]
-                result = result + templist
+        result = add_result(result, search_movies)
 
     return jsonify(movie_schema.dump(result, many=True))
 
+#helper method to query all movies
+def query_all():
+    result = []
+    all_movies = Movie.query.all()
+    result = movies_schema.dump(all_movies)
+    return result
+
+#helper method to query by search
+def query_search(query):
+    result = []
+    columnsList = list(movies_schema.fields.keys())
+    columnsList.remove('id')
+    columnsList.remove('poster')
+
+    #looks through every column for the query
+    for column in columnsList:
+        if column.lower() in "oscars":
+            search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(query))).all()
+        else:
+            search_movies = Movie.query.filter(Movie.__getattribute__(Movie, column).contains(query)).all()
+        print(column)
+        print(search_movies)
+
+        result = add_result(result, search_movies)
+
+    return result
+
+def add_result(prev_result, new_result):
+    for movie in new_result:
+
+        #only adds searches not already in result
+        if movie not in prev_result:
+            templist = [movie]
+            prev_result = prev_result + templist
+    return prev_result
+    
+
+#get json by ID
+@app.route('/Oscarpedia/json/<id>', methods=['GET'])
+def get_movie(id):
+    movie = Movie.query.get(id)
+    return movie_schema.jsonify(movie)
 
 #modify movie entry with json
 @app.route('/Oscarpedia/<id>', methods=['PUT'])
