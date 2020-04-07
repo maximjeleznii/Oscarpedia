@@ -48,13 +48,11 @@
         {% endwith %}
         <h1 class="text-center">{{ title }}</h1>
         <div class="row justify-content-center">
-            <div class="col-2 border">
+            <div class="border btn-group">
                 {% if not page == 1 %}
-                    <a href="{{ prev_url }}">{{ page-1 }}</a>
+                    <a class="btn" href="{{ prev_url }}">Prev</a>
                 {% endif %}
-            </div>
-            <div class="col-2 border">
-                <a href="{{ next_url }}">{{ page+1 }}</a>
+                <a class="btn" href="{{ next_url }}">Next</a>
             </div>
         </div>
         {% block content %}{% endblock %}
