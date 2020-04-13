@@ -5,9 +5,9 @@
         {% for result in result %}
         <div class="row my-4 ml-2 mr-2 border border-dark">
             <div class="col-sm-2 ml-4 mr-4 my-2">
-                <div class="row">
-                    <img class="mx-auto" src= {{ url_for('static', filename = 'images/posters/'+ result.name.lower()+'.jpg') }}
-                        alt={{ result.name }} width="90" height="120"></img>
+                <div class="row my-2">
+                    <img class="mx-auto" src={{ result.poster }}
+                        alt='' width="100" height="150"></img>
                 </div>
                 <div class="row">
                     <h8 class="mx-auto text-center">{{ result.name }} ({{ result.year }})</h8>
@@ -18,16 +18,41 @@
                     <p>{{ result.description }}</p>
                 </div>
                 <div class="row">
-                    <a class="mr-2" data-toggle="collapse" 
+                    <a class="mr-2 my-1" data-toggle="collapse" 
                         href={{ "#a"+result.id|string }} aria-expanded="false" 
                         aria-controls={{ "a"+result.id|string }}>
                         Oscars:
                     </a>
-                    <p class="collapse" id={{ "a"+result.id|string }}>
+                    <p class="collapse my-1" id={{ "a"+result.id|string }}>
                         {% for oscars in result.oscars %}
                             {{ oscars.category+"," }}
                         {% endfor %}
                     </p>
+                </div>
+                <div class="row my-1">
+                    <p>IMDB Rating: {{ result.rating }}</p>
+                </div>
+                <div class="row my-1">
+                    <div class="col pl-0">
+                        <p>
+                            Oscarpedia User Rating: 
+                            {% if result.num_of_ratings != 0 %}
+                                {{ "%.1f"|format(result.user_rating) }}
+                            {% else %}
+                                None
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        <form novalidate method="POST" class="justify-content-end input-group">
+                            {{ ratingform.csrf_token() }}
+                            {{ ratingform.request_id(value=result.id) }}
+                            {{ ratingform.rating }}
+                            <div class="input-group-append">
+                                {{ ratingform.submit }}
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

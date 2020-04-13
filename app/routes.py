@@ -2,19 +2,26 @@ from flask import render_template, flash, redirect
 from flask import jsonify, make_response, request, url_for
 from app import app, db, ma
 from app.models import *
-from app.forms import SearchForm
+from app.forms import SearchForm, RatingForm
+import requests, json
 
 #posts movies into database from json
 @app.route('/Oscarpedia/json', methods=['POST'])
 def add_movie():
-    name = request.json['name']
-    year = request.json['year']
-    description = request.json['description']
-
-    new_movie = Movie(name, year, description)
-
-    movies.session.add(new_movie)
-    movies.session.commit()
+    omdbApi = omdb_request(request.json['name'])
+    name = omdbApi['Title']
+    year = omdbApi['Year']
+    description = omdbApi['Plot']
+    oscars = request.json['oscars']
+    poster = omdbApi['Poster']
+    ratings = omdbApi['Ratings']
+    rating = ratings[0]['Value']
+    new_movie = Movie(name, year, description, poster, rating)
+    for oscar in oscars:
+        search_oscar = Oscar.query.filter(Oscar.category.contains(oscar['category'])).one()
+        new_movie.oscars.append(search_oscar)
+    db.session.add(new_movie)
+    db.session.commit()
 
     return movie_schema.jsonify(new_movie)
 
@@ -23,76 +30,117 @@ def add_movie():
 def get_movies():
     result=[]
     searchform = SearchForm()
-    args = request.args
+    ratingform = RatingForm()
+    args = request.args.copy()
     page = args.get('page', 1, type=int)
 
-    if searchform.validate_on_submit():
-        return redirect(url_for('get_movies', search=searchform.search.data))
+    #removing page from args
+    if(bool(args.get('page'))):
+        args.pop('page')
 
-    #if no searches return all
-    if not bool(args.get('search')):
+    #constructing querystring
+    querystring = ''
+    for arg in args:
+        querystring = querystring+'&'+arg+'='+args.get(arg)
+    print(querystring)
+
+    if searchform.validate_on_submit():
+        search = searchform.search.data
+        search_type = searchform.search_field.data
+        return redirect(url_for('get_movies')+'?'+search_type+'='+search)
+    
+    if ratingform.validate_on_submit():
+        movie = Movie.query.get(int(ratingform.request_id.data))
+        movie.num_of_ratings = movie.num_of_ratings + 1
+        movie.user_rating = (movie.user_rating*(movie.num_of_ratings-1) + int(ratingform.rating.data))/movie.num_of_ratings
+        db.session.commit()
+        return redirect(url_for('get_movies', page=page)+querystring)
+
+    #if has no search return all
+    if not bool(args):
         title = "Welcome to the Oscarpedia"
         result = query_all()
 
-    #return searches      
+    #return query of args 
     else:
         title = "Search Results"
-        result = query_search(args.get('search'))
+        result = query_args(args)
 
     #handling next and prev urls
     if not page==1:
-        prev_url=url_for('get_movies', search=args.get('search'), page=page-1)
+        prev_url=url_for('get_movies', page=page-1)+querystring
     else:
-        prev_url=url_for('get_movies', search=args.get('search'), page=page)
+        prev_url=url_for('get_movies', page=page)+querystring
     if bool(result[(page+1)*app.config['MOVIES_PER_PAGE']-5:(page+1)*app.config['MOVIES_PER_PAGE']]):
-        next_url=url_for('get_movies', search=args.get('search'), page=page+1)
+        next_url=url_for('get_movies', page=page+1)+querystring
     else:
-        next_url=url_for('get_movies', search=args.get('search'), page=page)
+        next_url=url_for('get_movies', page=page)+querystring
+    json_url = url_for('get_movies_json', page=page)+querystring
 
     #picking out results relavent ot the page
     result = result[page*app.config['MOVIES_PER_PAGE']-5:page*app.config['MOVIES_PER_PAGE']]
 
-    return render_template('index.html', title=title, result=result, searchform=searchform, 
-                        page=page, prev_url=prev_url, next_url=next_url)
+    return render_template('index.html', title=title, result=result, searchform=searchform, json_url=json_url,
+                        page=page, prev_url=prev_url, next_url=next_url, ratingform = ratingform)
 
 
 #get all json or by search
 @app.route('/Oscarpedia/json', methods=['GET'])
-def search_json():
+def get_movies_json():
     result = []
-    args = request.args
-    search_movies = []
+    args = request.args.copy()
+    page = args.get('page', 1, type=int)
 
+    #removing page from args
+    if(bool(args.get('page'))):
+        args.pop('page')
+    
     #if no searches return all
     if not bool(args):
         result = query_all()
-        return jsonify(movie_schema.dump(result))
 
     #else search through database
     else:
+        result = query_args(args)
 
-        #comes up with search results for every request in args
-        for k, v in args.items():
-
-            #relationship searches need their own if instances, such as oscars
-            try:
-                if k.lower() in "oscars":
-                    search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(v))).all()
-                elif k.lower() in "search":
-                    search_movies = query_search(v)
-                else:
-                    search_movies = Movie.query.filter(Movie.__getattribute__(Movie, k).contains(v)).all()
-            except:
-                pass
-
-        result = add_result(result, search_movies)
+    result = result[page*app.config['MOVIES_PER_PAGE']-5:page*app.config['MOVIES_PER_PAGE']]
 
     return jsonify(movie_schema.dump(result, many=True))
+
+
+#helper method that gets OMBD data for a movie
+def omdb_request(request):
+    url = f"{app.config['OMDB_URL']}?apikey={app.config['API_KEY']}&t={request}"
+    req = requests.get(url)
+
+    if not req.content:
+        return None
+    return json.loads(req.content)
 
 #helper method to query all movies
 def query_all():
     result = []
     result = Movie.query.all()
+    return result
+
+#helper method to query results for every request in args
+def query_args(args):
+    result = []
+    search_movies = []
+    for k, v in args.items():
+
+        #relationship searches need their own if instances, such as oscars
+        try:
+            if k.lower() in "oscars":
+                search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(v))).all()
+            elif k.lower() in "search":
+                search_movies = query_search(v)
+            else:
+                search_movies = Movie.query.filter(Movie.__getattribute__(Movie, k).contains(v)).all()
+        except:
+            pass
+        result = add_result(result, search_movies)
+
     return result
 
 #helper method to query by search
@@ -108,9 +156,6 @@ def query_search(query):
             search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(query))).all()
         else:
             search_movies = Movie.query.filter(Movie.__getattribute__(Movie, column).contains(query)).all()
-        print(column)
-        print(search_movies)
-
         result = add_result(result, search_movies)
 
     return result
@@ -132,19 +177,32 @@ def get_movie(id):
     return movie_schema.jsonify(movie)
 
 #modify movie entry with json
-@app.route('/Oscarpedia/<id>', methods=['PUT'])
+@app.route('/Oscarpedia/json/<id>', methods=['PUT'])
 def update_movie(id):
     movie = Movie.query.get(id)
 
     name = request.json['name']
     year = request.json['year']
     description = request.json['description']
+    oscars = request.json['oscars']
+    poster = request.json['poster']
+    rating = request.json['rating']
+    user_rating = request.json['user_rating']
+    num_of_ratings = request.json['num_of_ratings']
 
     movie.name = name
     movie.year = year
     movie.description = description
+    movie.oscars = []
+    movie.poster = poster
+    movie.rating = rating
+    movie.user_rating = user_rating
+    movie.num_of_ratings = num_of_ratings
+    for oscar in oscars:
+        search_oscar = Oscar.query.filter(Oscar.category.contains(oscar['category'])).one()
+        movie.oscars.append(search_oscar)
 
-    movies.session.commit()
+    db.session.commit()
 
     return movie_schema.jsonify(movie)
 
@@ -153,8 +211,8 @@ def update_movie(id):
 @app.route('/Oscarpedia/<id>', methods=['DELETE'])
 def delete_movie(id):
     movie = Movie.query.get(id)
-    movies.session.delete(movie)
-    movies.session.commit()
+    db.session.delete(movie)
+    db.session.commit()
 
     return movie_schema.jsonify(movie)
 

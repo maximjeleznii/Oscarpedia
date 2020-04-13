@@ -7,3 +7,5 @@ class Config(object):
         'sqlite:///' + os.path.join(basedir, 'db.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MOVIES_PER_PAGE = 5
+    API_KEY = '244adc33'
+    OMDB_URL = 'http://www.omdbapi.com'

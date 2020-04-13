@@ -20,16 +20,26 @@
             crossorigin="anonymous"></script>
     </head>
     <body>
-        <nav class="navbar navbar-dark bg-dark">
-            <a class="navbar-brand inl" href={{ url_for('get_movies') }}>Oscarpedia</a>
-            <div class="justify-content-end">
-                <form novalidate method="POST" class="form-inline my-0 justify-content-end">
-                    <div class="form-group row my-1">
-                        {{ searchform.hidden_tag() }}
-                        <div class="col pr-1 my-1">
-                            {{ searchform.search }}
+        <nav class="navbar navbar-dark bg-dark justify-content-between">
+            <div>
+                <a class="navbar-brand btn inl py-0" href={{ url_for('get_movies') }}>Oscarpedia</a>
+                <div class="btn-group">
+                    <a class="nav-link inl btn btn-secondary" href={{ url_for('get_movies') }}>Home</a>
+                    <a class="nav-link inl btn btn-secondary" 
+                        href={{ json_url }}>
+                            Jsonify
+                    </a>
+                </div>
+            </div>
+            <div>
+                <form novalidate method="POST" class="form-inline my-0">
+                    <div class="input-group my-1">
+                        {{ searchform.csrf_token() }}
+                        <div class="input-group-prepend">
+                            {{ searchform.search_field }}
                         </div>
-                        <div class="col pl-1 my-1">
+                        {{ searchform.search(value=search) }}
+                        <div class="input-group-append">
                             {{ searchform.submit }}
                         </div>
                     </div>
