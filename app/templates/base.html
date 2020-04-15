@@ -4,11 +4,7 @@
         href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
          crossorigin="anonymous">
-        {% if title %}
         <title>{{ title }} - Oscarpedia</title>
-        {% else %}
-        <title>Welcome to Oscarpedia</title>
-        {% endif %}
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
             integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" 
             crossorigin="anonymous"></script>
@@ -59,10 +55,20 @@
         <h1 class="text-center">{{ title }}</h1>
         <div class="row justify-content-center">
             <div class="border btn-group">
-                {% if not page == 1 %}
-                    <a class="btn" href="{{ prev_url }}">Prev</a>
+                {% if this_url==first_url %}
+                <a class="btn disabled" href="{{ first_url }}" aria-disabled="true">First</a>
+                <a class="btn border-right disabled" href="{{ prev_url }}" aria-disabled="true">Prev</a>
+                {% else %}
+                <a class="btn" href="{{ first_url }}">First</a>
+                <a class="btn border-right" href="{{ prev_url }}">Prev</a>
                 {% endif %}
-                <a class="btn" href="{{ next_url }}">Next</a>
+                {% if this_url==last_url %}
+                <a class="btn border-left disabled" href="{{ next_url }}" aria-disabled="true">Next</a>
+                <a class="btn disabled" href="{{ last_url }}" aria-disabled="true">Last</a>
+                {% else %}
+                <a class="btn border-left" href="{{ next_url }}">Next</a>
+                <a class="btn" href="{{ last_url }}">Last</a>
+                {% endif %}
             </div>
         </div>
         {% block content %}{% endblock %}

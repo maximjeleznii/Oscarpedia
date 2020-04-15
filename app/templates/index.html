@@ -30,14 +30,14 @@
                     </p>
                 </div>
                 <div class="row my-1">
-                    <p>IMDB Rating: {{ result.rating }}</p>
+                    <p>IMDB Rating: {{ result.rating }}/10</p>
                 </div>
                 <div class="row my-1">
                     <div class="col pl-0">
                         <p>
                             Oscarpedia User Rating: 
                             {% if result.num_of_ratings != 0 %}
-                                {{ "%.1f"|format(result.user_rating) }}
+                                {{ "%.1f"|format(result.user_rating) }}/10
                             {% else %}
                                 None
                             {% endif %}

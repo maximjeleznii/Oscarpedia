@@ -14,8 +14,7 @@ def add_movie():
     description = omdbApi['Plot']
     oscars = request.json['oscars']
     poster = omdbApi['Poster']
-    ratings = omdbApi['Ratings']
-    rating = ratings[0]['Value']
+    rating = omdbApi['imdbRating']
     new_movie = Movie(name, year, description, poster, rating)
     for oscar in oscars:
         search_oscar = Oscar.query.filter(Oscar.category.contains(oscar['category'])).one()
@@ -38,11 +37,11 @@ def get_movies():
     if(bool(args.get('page'))):
         args.pop('page')
 
-    #constructing querystring
+    #constructing querystring and saving current url
     querystring = ''
     for arg in args:
         querystring = querystring+'&'+arg+'='+args.get(arg)
-    print(querystring)
+    this_url = url_for('get_movies', page=page)+querystring
 
     if searchform.validate_on_submit():
         search = searchform.search.data
@@ -54,7 +53,7 @@ def get_movies():
         movie.num_of_ratings = movie.num_of_ratings + 1
         movie.user_rating = (movie.user_rating*(movie.num_of_ratings-1) + int(ratingform.rating.data))/movie.num_of_ratings
         db.session.commit()
-        return redirect(url_for('get_movies', page=page)+querystring)
+        return redirect(this_url)
 
     #if has no search return all
     if not bool(args):
@@ -66,22 +65,29 @@ def get_movies():
         title = "Search Results"
         result = query_args(args)
 
-    #handling next and prev urls
+    #getting page number of last page
+    lastpage = int(len(result)/app.config['MOVIES_PER_PAGE'])
+    if(len(result)%app.config['MOVIES_PER_PAGE']>0):
+        lastpage = lastpage+1
+
+    #handling urls
+    json_url = url_for('get_movies_json', page=page)+querystring
+    first_url = url_for('get_movies', page=1)+querystring
+    last_url = url_for('get_movies', page=lastpage)+querystring
     if not page==1:
         prev_url=url_for('get_movies', page=page-1)+querystring
     else:
-        prev_url=url_for('get_movies', page=page)+querystring
-    if bool(result[(page+1)*app.config['MOVIES_PER_PAGE']-5:(page+1)*app.config['MOVIES_PER_PAGE']]):
+        prev_url=first_url
+    if not page==lastpage:
         next_url=url_for('get_movies', page=page+1)+querystring
     else:
-        next_url=url_for('get_movies', page=page)+querystring
-    json_url = url_for('get_movies_json', page=page)+querystring
-
+        next_url=last_url
+    
     #picking out results relavent ot the page
-    result = result[page*app.config['MOVIES_PER_PAGE']-5:page*app.config['MOVIES_PER_PAGE']]
+    result = result[page*app.config['MOVIES_PER_PAGE']-app.config['MOVIES_PER_PAGE']:page*app.config['MOVIES_PER_PAGE']]
 
-    return render_template('index.html', title=title, result=result, searchform=searchform, json_url=json_url,
-                        page=page, prev_url=prev_url, next_url=next_url, ratingform = ratingform)
+    return render_template('index.html', title=title, result=result, searchform=searchform, ratingform = ratingform, json_url=json_url,
+                        page=page, prev_url=prev_url, next_url=next_url, last_url=last_url, first_url=first_url, this_url=this_url)
 
 
 #get all json or by search
