@@ -99,7 +99,7 @@ def get_movies():
 def get_movies_json():
     result = []
     args = request.args.copy()
-    page = args.get('page', 1, type=int)
+    page = args.get('page', 0, type=int)
 
     #removing page from args
     if(bool(args.get('page'))):
@@ -113,7 +113,9 @@ def get_movies_json():
     else:
         result = query_args(args)
 
-    result = result[page*app.config['MOVIES_PER_PAGE']-5:page*app.config['MOVIES_PER_PAGE']]
+    #if there is a page request, paginate result
+    if(page!=0):
+        result = result[page*app.config['MOVIES_PER_PAGE']-5:page*app.config['MOVIES_PER_PAGE']]
 
     return jsonify(movie_schema.dump(result, many=True))
 
