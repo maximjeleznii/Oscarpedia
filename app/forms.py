@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired
 
+
 class SearchForm(FlaskForm):
     search = StringField('search', validators=[DataRequired()], 
                         render_kw={'class': 'form-control border-0', 'placeholder': 'Search Here'})
@@ -9,6 +10,7 @@ class SearchForm(FlaskForm):
                         ('description', 'Description'), ('oscars', 'Oscars'), ('rating', 'Rating'), ('user_rating', 'User Rating')], 
                         default='search', render_kw={'class': 'custom-select btn border-0'})
     submit = SubmitField('Submit', render_kw={'class': 'btn btn-secondary border-0'})
+
 
 class RatingForm(FlaskForm):
     request_id = HiddenField('Request ID')

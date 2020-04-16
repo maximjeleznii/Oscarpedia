@@ -5,7 +5,8 @@ from app.models import *
 from app.forms import SearchForm, RatingForm
 import requests, json
 
-#posts movies into database from json
+
+#posts movies into database from json and using OMDB
 @app.route('/Oscarpedia/json', methods=['POST'])
 def add_movie():
     omdbApi = omdb_request(request.json['name'])
@@ -23,6 +24,7 @@ def add_movie():
     db.session.commit()
 
     return movie_schema.jsonify(new_movie)
+
 
 #get home page html
 @app.route('/Oscarpedia', methods=['GET', 'POST'])
@@ -43,11 +45,13 @@ def get_movies():
         querystring = querystring+'&'+arg+'='+args.get(arg)
     this_url = url_for('get_movies', page=page)+querystring
 
+    #Search bar functionality
     if searchform.validate_on_submit():
         search = searchform.search.data
         search_type = searchform.search_field.data
         return redirect(url_for('get_movies')+'?'+search_type+'='+search)
     
+    #Rating functionality
     if ratingform.validate_on_submit():
         movie = Movie.query.get(int(ratingform.request_id.data))
         movie.num_of_ratings = movie.num_of_ratings + 1
@@ -114,73 +118,12 @@ def get_movies_json():
     return jsonify(movie_schema.dump(result, many=True))
 
 
-#helper method that gets OMBD data for a movie
-def omdb_request(request):
-    url = f"{app.config['OMDB_URL']}?apikey={app.config['API_KEY']}&t={request}"
-    req = requests.get(url)
-
-    if not req.content:
-        return None
-    return json.loads(req.content)
-
-#helper method to query all movies
-def query_all():
-    result = []
-    result = Movie.query.all()
-    return result
-
-#helper method to query results for every request in args
-def query_args(args):
-    result = []
-    search_movies = []
-    for k, v in args.items():
-
-        #relationship searches need their own if instances, such as oscars
-        try:
-            if k.lower() in "oscars":
-                search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(v))).all()
-            elif k.lower() in "search":
-                search_movies = query_search(v)
-            else:
-                search_movies = Movie.query.filter(Movie.__getattribute__(Movie, k).contains(v)).all()
-        except:
-            pass
-        result = add_result(result, search_movies)
-
-    return result
-
-#helper method to query by search
-def query_search(query):
-    result = []
-    columnsList = list(movies_schema.fields.keys())
-    columnsList.remove('id')
-    columnsList.remove('poster')
-
-    #looks through every column for the query
-    for column in columnsList:
-        if column.lower() in "oscars":
-            search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(query))).all()
-        else:
-            search_movies = Movie.query.filter(Movie.__getattribute__(Movie, column).contains(query)).all()
-        result = add_result(result, search_movies)
-
-    return result
-
-def add_result(prev_result, new_result):
-    for movie in new_result:
-
-        #only adds searches not already in result
-        if movie not in prev_result:
-            templist = [movie]
-            prev_result = prev_result + templist
-    return prev_result
-    
-
 #get json by ID
 @app.route('/Oscarpedia/json/<id>', methods=['GET'])
 def get_movie(id):
     movie = Movie.query.get(id)
     return movie_schema.jsonify(movie)
+
 
 #modify movie entry with json
 @app.route('/Oscarpedia/json/<id>', methods=['PUT'])
@@ -222,3 +165,68 @@ def delete_movie(id):
 
     return movie_schema.jsonify(movie)
 
+
+#helper method that gets OMBD data for a movie
+def omdb_request(request):
+    url = f"{app.config['OMDB_URL']}?apikey={app.config['API_KEY']}&t={request}"
+    req = requests.get(url)
+
+    if not req.content:
+        return None
+    return json.loads(req.content)
+
+
+#helper method to query all movies
+def query_all():
+    result = []
+    result = Movie.query.all()
+    return result
+
+
+#helper method to query results for every request in args
+def query_args(args):
+    result = []
+    search_movies = []
+    for k, v in args.items():
+
+        #relationship searches need their own if instances, such as oscars
+        try:
+            if k.lower() in "oscars":
+                search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(v))).all()
+            elif k.lower() in "search":
+                search_movies = query_search(v)
+            else:
+                search_movies = Movie.query.filter(Movie.__getattribute__(Movie, k).contains(v)).all()
+        except:
+            pass
+        result = add_result(result, search_movies)
+
+    return result
+
+#helper method to query by search
+def query_search(query):
+    result = []
+    columnsList = list(movies_schema.fields.keys())
+    columnsList.remove('id')
+    columnsList.remove('poster')
+
+    #looks through every column for the query
+    for column in columnsList:
+        if column.lower() in "oscars":
+            search_movies = Movie.query.filter(Movie.oscars.any(Oscar.category.contains(query))).all()
+        else:
+            search_movies = Movie.query.filter(Movie.__getattribute__(Movie, column).contains(query)).all()
+        result = add_result(result, search_movies)
+
+    return result
+
+
+#helper method to add lists of objects together
+def add_result(prev_result, new_result):
+    for movie in new_result:
+
+        #only adds searches not already in result
+        if movie not in prev_result:
+            templist = [movie]
+            prev_result = prev_result + templist
+    return prev_result

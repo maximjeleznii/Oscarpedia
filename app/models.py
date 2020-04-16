@@ -29,6 +29,7 @@ class Movie(db.Model):
         self.user_rating = 0
         self.num_of_ratings = 0
 
+
 #Oscar Category Model
 class Oscar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,6 +46,7 @@ class OscarSchema(ma.Schema):
 
 oscar_schema = OscarSchema()
 oscars_schema = OscarSchema(many=True)
+
 
 class MovieSchema(ma.Schema):
     oscars = ma.Nested(OscarSchema, many=True)
