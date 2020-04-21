@@ -28,7 +28,7 @@
                 </div>
             </div>
             <div>
-                <form novalidate method="POST" class="form-inline my-0">
+                <form novalidate method="POST" class="form-inline my-0 px-0">
                     <div class="input-group my-1">
                         {{ searchform.csrf_token() }}
                         <div class="input-group-prepend">
@@ -53,7 +53,7 @@
         {% endif %}
         {% endwith %}
         <h1 class="text-center">{{ title }}</h1>
-        <div class="row justify-content-center">
+        <div class="row justify-content-center mx-0">
             <div class="border btn-group">
                 {% if this_url==first_url %}
                 <a class="btn disabled" href="{{ first_url }}" aria-disabled="true">First</a>
@@ -72,5 +72,23 @@
             </div>
         </div>
         {% block content %}{% endblock %}
+        <div class="row justify-content-center mx-0 pb-5">
+            <div class="border btn-group">
+                {% if this_url==first_url %}
+                <a class="btn disabled" href="{{ first_url }}" aria-disabled="true">First</a>
+                <a class="btn border-right disabled" href="{{ prev_url }}" aria-disabled="true">Prev</a>
+                {% else %}
+                <a class="btn" href="{{ first_url }}">First</a>
+                <a class="btn border-right" href="{{ prev_url }}">Prev</a>
+                {% endif %}
+                {% if this_url==last_url %}
+                <a class="btn border-left disabled" href="{{ next_url }}" aria-disabled="true">Next</a>
+                <a class="btn disabled" href="{{ last_url }}" aria-disabled="true">Last</a>
+                {% else %}
+                <a class="btn border-left" href="{{ next_url }}">Next</a>
+                <a class="btn" href="{{ last_url }}">Last</a>
+                {% endif %}
+            </div>
+        </div>
     </body>
 </html>
