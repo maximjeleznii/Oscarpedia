@@ -4,7 +4,7 @@
     <div class="container">
         {% for result in result %}
         <div class="row my-4 ml-2 mr-2 border border-dark">
-            <div class="col-sm-2 ml-4 mr-4 my-2">
+            <div class="col-2 ml-4 mr-4 my-2">
                 <div class="row my-2">
                     <img class="mx-auto" src={{ result.poster }}
                         alt='' width="100" height="150"></img>
@@ -30,7 +30,7 @@
                     </p>
                 </div>
                 <div class="row my-1">
-                    <p><a href={{ result.IMDB_link }}>IMDB<a> Rating: {{ result.rating }}/10</p>
+                    <p><a href={{ result.IMDB_link }}>IMDB</a> Rating: {{ result.rating }}/10</p>
                 </div>
                 <div class="row my-1">
                     <div class="col pl-0">
