@@ -19,6 +19,7 @@ class Movie(db.Model):
     rating = db.Column(db.String(100))
     user_rating =  db.Column(db.Integer, )
     num_of_ratings = db.Column(db.Integer)
+    IMDB_link = db.Column(db.String(200))
 
     def __init__(self, name, year, description, poster, rating):
         self.name = name
@@ -28,6 +29,7 @@ class Movie(db.Model):
         self.rating = rating
         self.user_rating = 0
         self.num_of_ratings = 0
+        self.IMDB_link = "http://www.imdb.com/find?s=tt&q=" + name
 
 
 #Oscar Category Model
@@ -51,7 +53,7 @@ oscars_schema = OscarSchema(many=True)
 class MovieSchema(ma.Schema):
     oscars = ma.Nested(OscarSchema, many=True)
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'oscars', 'poster', 'rating', 'user_rating', 'num_of_ratings')
+        fields = ('id', 'name', 'year', 'description', 'oscars', 'poster', 'rating', 'user_rating', 'num_of_ratings', 'IMDB_link')
 
 movie_schema = MovieSchema()
 movies_schema = MovieSchema(many=True)
