@@ -131,30 +131,29 @@ def get_movie(id):
 @app.route('/Oscarpedia/json/<id>', methods=['PUT'])
 def update_movie(id):
     movie = Movie.query.get(id)
-
-    name = movie.name
-    IMDB_link = "http://www.imdb.com/find?s=tt&q=" + name 
-    #name = request.json['name']
-    #year = request.json['year']
-    #description = request.json['description']
-    #oscars = request.json['oscars']
-    #poster = request.json['poster']
-    #rating = request.json['rating']
-    #user_rating = request.json['user_rating']
-    #num_of_ratings = request.json['num_of_ratings']
+    
+    name = request.json['name']
+    year = request.json['year']
+    description = request.json['description']
+    oscars = request.json['oscars']
+    poster = request.json['poster']
+    rating = request.json['rating']
+    user_rating = request.json['user_rating']
+    num_of_ratings = request.json['num_of_ratings']
+    IMDB_link = request.json['IMDB_link']
 
     movie.name = name
+    movie.year = year
+    movie.description = description
+    movie.oscars = []
+    movie.poster = poster
+    movie.rating = rating
+    movie.user_rating = user_rating
+    movie.num_of_ratings = num_of_ratings
     movie.IMDB_link = IMDB_link
-    #movie.year = year
-    #movie.description = description
-    #movie.oscars = []
-    #movie.poster = poster
-    #movie.rating = rating
-    #movie.user_rating = user_rating
-    #movie.num_of_ratings = num_of_ratings
-    #for oscar in oscars:
-    #    search_oscar = Oscar.query.filter(Oscar.category.contains(oscar['category'])).one()
-    #    movie.oscars.append(search_oscar)
+    for oscar in oscars:
+        search_oscar = Oscar.query.filter(Oscar.category.contains(oscar['category'])).one()
+        movie.oscars.append(search_oscar)
 
     db.session.commit()
 
