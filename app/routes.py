@@ -33,6 +33,8 @@ def get_movies():
     searchform = SearchForm()
     ratingform = RatingForm()
     args = request.args.copy()
+
+    #default page value of 1
     page = args.get('page', 1, type=int)
 
     #removing page from args
@@ -74,6 +76,12 @@ def get_movies():
     if(len(result)%app.config['MOVIES_PER_PAGE']>0):
         lastpage = lastpage+1
 
+    #checking if the given page is more than the last page or less than 1
+    if(page>lastpage):
+        page = lastpage
+    if(page<1):
+        page = 1
+
     #handling urls
     json_url = url_for('get_movies_json', page=page)+querystring
     first_url = url_for('get_movies', page=1)+querystring
@@ -99,6 +107,8 @@ def get_movies():
 def get_movies_json():
     result = []
     args = request.args.copy()
+
+    #0 is the default page value that returns non paginated results
     page = args.get('page', 0, type=int)
 
     #removing page from args
@@ -113,9 +123,21 @@ def get_movies_json():
     else:
         result = query_args(args)
 
-    #if there is a page request, paginate result
+    #getting page number of last page
+    lastpage = int(len(result)/app.config['MOVIES_PER_PAGE'])
+    if(len(result)%app.config['MOVIES_PER_PAGE']>0):
+        lastpage = lastpage+1
+
+    #checking if the given page is more than the last page or less than 0
+    if(page>lastpage):
+        page = lastpage
+    if(page<0):
+        page = 0
+
+    #if there is a page is not 0, paginate result
     if(page!=0):
         result = result[page*app.config['MOVIES_PER_PAGE']-5:page*app.config['MOVIES_PER_PAGE']]
+
 
     return jsonify(movie_schema.dump(result, many=True))
 
