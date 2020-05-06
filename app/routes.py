@@ -191,6 +191,11 @@ def delete_movie(id):
 
     return movie_schema.jsonify(movie)
 
+#gets documentation html
+@app.route('/Oscarpedia/doc', methods=['GET'])
+def get_doc():
+    return render_template('doc.html')
+
 
 #helper method that gets OMBD data for a movie
 def omdb_request(request):

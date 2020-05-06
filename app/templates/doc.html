@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" 
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+         crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" 
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" 
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" 
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" 
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" 
+            crossorigin="anonymous"></script>
+	<style type="text/css">
+		table, th, td {
+ 		 border: 1px solid white;
+ 		 padding: 3px;
+		}
+		.doc {
+  		font-family: courier, serif;
+  		padding: 50px;
+		}
+	</style>
+	<title>Oscarpedia Documentation</title>
+</head>
+<body style="background-color:black;">
+	<nav class="navbar navbar-dark bg-dark justify-content-between">
+		<div>
+			<a class="navbar-brand btn inl py-0" href={{ url_for('get_movies') }}>Oscarpedia</a>
+			<div class="btn-group">
+				<a class="nav-link inl btn btn-secondary" href={{ url_for('get_movies') }}>Home</a>
+				<a class="nav-link inl btn btn-secondary" href={{ url_for('get_doc') }}>Documentation</a>
+			</div>
+		</div>
+	</nav>
+
+	<div class="doc">
+		<div>
+			<h1 style="color:white;font-family:verdana;text-align: center;">Oscarpedia Documentation</h1>
+		</div>
+
+		<div>
+			<p style="color:#B0BF1A">The Oscarpedia is a database of Oscar winning movies from the years 2000-2007. It allows users multiple ways to look through the movies, find them on IMDB and give their own personal rating. Each movie entry features the Title, Year, Poster, Description, IMDB Rating, Oscar Awards, and a rating given by Oscarpedia Users.</p>
+		</div>
+
+		<div>
+			<h3 style="color:#B0BF1A">GET /Oscarpedia</h3>
+			<ul>
+				<li style="color:white">provides a GUI endpoint for the the first page of all the results of the database, initially 	paginated to the first 5 results.</li>
+			</ul>
+			<h3 style="color:#B0BF1A">GET /Oscarpedia/json</h3>
+			<ul>
+				<li style="color:white">provides a JSON endpoint for the first page of all the results of the database.</li>
+			</ul>
+		</div>
+
+		<table style="width:100%; color:white; padding-bottom:50px">
+	  	<thead></thead>>
+	  		<th style="text-align:center; border:0"></thead>Queries for both /Oscarpedia and /Oscarpedia/json</th>
+	  	</thead>
+	  	<tr>
+	    	<td>?page=&lt;Page Number&gt;</td>
+	    	<td>Any integers 0-24 are valid, returns that page of results. A page of 0 or no page for /Oscarpedia/json will return all results. Pages are paginated to 5 results each.
+	    	</td>
+	  	</tr>
+	  	<tr>
+	    	<td>?search=&lt;Search&gt;</td>
+	    	<td>Any characters are valid, returns result based matching characters from any field.</td>
+	  	</tr>
+	  	<tr>
+	    	<td>?year=&lt;Year&gt;</td>
+	    	<td>Any characters are valid, characters other than integers likely won’t return results. Returns result based matching characters from the year field.</td>
+	  	</tr>
+	  	<tr>
+	    	<td>?name=&lt;Search&gt;</td>
+	    	<td>Any characters are valid, returns result based matching characters from the title field.</td>
+	  	</tr>
+	  	<tr>
+	    	<td>?description=&lt;Search&gt;</td>
+	    	<td>Any characters are valid, returns result based matching characters from the description field.</td>
+	  	</tr>
+	  	<tr>
+	    	<td>?oscars=&lt;Search&gt;</td>
+	    	<td>Any characters are valid, returns result based matching characters from the oscars field.</td>
+	  	</tr>
+	  	<tr>
+	    	<td>?rating=&lt;Search&gt;</td>
+	    	<td>Any characters are valid, characters other than integers likely won’t return results. Returns result based matching characters from the rating field.</td>
+	  	</tr>
+	  	<tr>
+	    	<td>?user_rating=&lt;Search&gt;</td>
+	    	<td>Any characters are valid, characters other than integers likely won’t return results. Returns result based matching characters from the user rating field.</td>
+	  	</tr>
+
+		</table>
+
+		<div>
+			<h3 style="color:#B0BF1A"> GET /Oscarpedia/json/&lt;id&gt;</h3>
+			<ul>
+				<li style="color:white">Provides a JSON endpoint to any movie in the database based on the movie’s id in the database. Id will return valid results for any integer between 1 and 120.</li>
+			</ul>
+
+			<h3 style="color:#B0BF1A">POST /Oscarpedia/json</h3>
+			<ul>
+				<li style="color:white">Provides a post route in which you can post the name of a movie and the oscars of the movie. All other information will be extracted using the OMDB Api. The post is done by taking JSON data as input, as shown below.</li>
+			</ul>
+			<div>
+				<img src="../static/images/doc/img1.png">
+			</div>
+			<div>
+				<img src="../static/images/doc/img2.png">
+			</div>
+			<h3 style="color:#B0BF1A">PUT /Oscarpedia/json&lt;id&gt;</h3>
+			<ul>
+				<li style="color:white">Provides a put route in which you can edit any field of the movies by id. The post is done by taking JSON data as input, as shown below.</li>
+			</ul>
+			<div>
+				<img src="../static/images/doc/img3.png">
+			</div>
+			<div>
+				<img src="../static/images/doc/img4.png">
+			</div>
+			<h3 style="color:#B0BF1A">DELETE /Oscarpedia/json/&lt;id&gt;</h3>
+			<ul>
+				<li style="color:white">Provides a JSON endpoint to delete any movie in the database based on the movie’s id in the database. Will return delete for any integer if the movie id exists.</li>
+			</ul>
+			
+		</div>
+
+	</div>
+
+</body>
+</html>
