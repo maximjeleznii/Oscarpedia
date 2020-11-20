@@ -4,3 +4,5 @@ Written for REST functionality with a GUI.
 Currently contains films from 2000-2007
 
 http://maximjeleznii.pythonanywhere.com/Oscarpedia
+
+Since its hosted free it goes down every few months, until reatctivation.
